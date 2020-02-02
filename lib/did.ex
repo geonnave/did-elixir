@@ -3,16 +3,34 @@ defmodule DID do
   Documentation for DID.
   """
 
-  @doc """
-  Hello world.
+  defstruct method: nil,
+            id: nil,
+            path: nil,
+            query: nil,
+            fragment: nil
 
-  ## Examples
+  def parse(%DID{} = did), do: did
 
-      iex> DID.hello()
-      :world
+  def parse("did:" <> input) when is_binary(input) do
+    [method, rest] = String.split(input, ":", parts: 2)
+    [id, fragment] = parse_id(rest)
 
-  """
-  def hello do
-    :world
+    %DID{
+      method: method,
+      id: id,
+      fragment: fragment
+    }
+  end
+
+  def parse(_), do: {:error, :invalid_input}
+
+  def parse_id(rest) do
+    case String.split(rest, "#", parts: 2) do
+      [id, rest] ->
+        [id, rest]
+
+      [id] ->
+        [id, ""]
+    end
   end
 end
